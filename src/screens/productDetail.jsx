@@ -14,17 +14,17 @@ export class ProductDetail extends Component {
         this.showImage = this.showImage.bind(this)
         this.state = {modalUrl:'https://picsum.photos/id/243/200/',modalVisible:false}
     }
-
+    
     headerDetail(){
-
+        let tempData = this.props.route.params.item
         return (<View>
-            <ImageCarousel styleImage={{height:240}} showImage = {(itemUrl)=>this.showImage(itemUrl)}/>
+            <ImageCarousel styleImage={{height:240}} showImage = {(itemUrl)=>this.showImage(itemUrl)} data={tempData}/>
             <Text style={[styles.textStyle,styles.badgeStyle]}>Protection</Text>
-            <Text style={styles.textStyle}>IPhone XR, Red, Empty Box</Text>
-            <Text style={[styles.textStyle, {fontWeight:'bold', marginVertical:8, fontSize:18}]}>S10$</Text>
+            <Text style={styles.textStyle}>{tempData.item_name}</Text>
+            <Text style={[styles.textStyle, {fontWeight:'bold', marginVertical:8, fontSize:18}]}>&#8377;{tempData.price}</Text>
             <View style={styles.viewRow}>
             <Feather name="watch" size={24} color="black" />
-            <Text  style={styles.textStyle}>1 month ago by <Text style={{color:'blue'}}>UserName</Text></Text>
+            <Text  style={styles.textStyle}>{tempData.description}{' '}<Text style={{color:'blue'}}>{tempData.username}</Text></Text>
             </View>
             <View style={styles.viewRow}>
                 <Feather name="heart" size={24} color="black" />
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
     viewRow:{flexDirection:'row', padding:4},
     textStyle:{
         marginHorizontal:12,
+        paddingHorizontal:5,
         fontSize:16
     },
     badgeStyle:{

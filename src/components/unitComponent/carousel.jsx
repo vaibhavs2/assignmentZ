@@ -10,18 +10,7 @@ const ENTRIES1 = [
       click:'Learn more',
       illustration: 'https://i.imgur.com/UYiroysl.jpg',
     },
-    {
-      title: 'Earlier this morning, NYC',
-      subtitle: 'Lorem ipsum dolor sit amet',
-      click:'Click here',
-      illustration: 'https://i.imgur.com/UPrs1EWl.jpg',
-    },
-    {
-      title: 'White Pocket Sunset',
-      subtitle: 'Lorem ipsum dolor sit amet et nuncat ',
-      click:'Click here',
-      illustration: 'https://i.imgur.com/MABUbpDl.jpg',
-    },
+    
    
   ];
 
@@ -38,11 +27,11 @@ export default class ImageCarousel extends Component {
             <TouchableOpacity 
             activeOpacity={0.9}
             onPress={()=>{ 
-                this.props.showImage? this.props.showImage(item.illustration):''}}>
+                this.props?.showImage? this.props.showImage(`http://18.221.177.41:8080${item.path_dir}`):''}}>
             <View style={this.props.viewStyle} >
               <Image
                 style={this.props.styleImage}
-                source={{uri: item.illustration}}
+                source={{uri: this.props?.showImage? `http://18.221.177.41:8080${item.path_dir}`:item.illustration}}
                 
                 />
                 { this.props.isText &&
@@ -64,7 +53,7 @@ export default class ImageCarousel extends Component {
                 sliderWidth={screenWidth}
                 sliderHeight={screenWidth}
                 itemWidth={screenWidth}
-                data={ENTRIES1}
+                data={this.props?.data? [this.props?.data,]:ENTRIES1}
                 renderItem={this._renderItem}
                 
             />

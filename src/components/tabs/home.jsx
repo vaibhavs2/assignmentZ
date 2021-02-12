@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { View , Text, StatusBar, TouchableOpacity,FlatList,SectionList, ScrollView } from 'react-native';
-import {StyleSheet} from 'react-native'
+import { View , Text, StatusBar,StyleSheet, TouchableOpacity,FlatList,SectionList, ScrollView, Alert } from 'react-native';
 import AntDesign  from 'react-native-vector-icons/AntDesign';
 import ImageCarousel from '../unitComponent/carousel'
 import {Card} from 'native-base'
@@ -55,7 +54,54 @@ const LISTDATA = [
 export class Home extends Component {
      constructor(props){
        super(props)
+       this.fetchProduct = this.fetchProduct.bind(this)
+       this.mount = true
+        this.state = {DATA:[]}
+      }
+
+      componentDidMount(){
+         if(this.mount)
+         this.fetchProduct()
      }
+
+     componentWillUnmount(){
+       this.mounted = false
+     }
+
+    async fetchProduct(){
+      fetch('http://18.221.177.41:8080/api/getListings')
+      .then((response) => response.json())
+      .then((json) => {
+
+        let tempData = []
+        let condition=true
+        json.data.forEach((element, index)=>{
+
+          condition=true
+          for(var i=0;i<tempData.length; i++){
+                if(tempData[i]?.title === element?.category)
+                  {
+                    tempData[i]?.data?.push(element)
+                    condition=false
+                    break;
+                  }
+                }
+              if(condition)     
+                  { tempData.push({title :element.category,
+                          data :[element,] })
+                        
+                        }
+        })
+
+        this.setState({DATA:tempData})
+      })
+        .catch((error) => {
+          console.log(error);
+        });
+
+    }
+
+
 
     render() {
         return (
@@ -77,40 +123,49 @@ export class Home extends Component {
                  
                  </View>
                     <SectionList
-                    ItemSeparatorComponent={() => <View style={{ height: 30, }}/>}
+                    ItemSeparatorComponent={() => <View style={{ height: 12, }}/>}
                         ListHeaderComponent={
                               <ImageCarousel styleImage={{height:145,width:'92%', borderRadius:6}} isText={true}
                                   styleText = {{marginBottom:18, color:'white',backgroundColor:'black'}}/> 
                             }
-                            sections={DATA}
+                            sections={this.state.DATA}
                             keyExtractor={(item, index) => item+index}
                             showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) => ( 
-                                <FlatList
-                                    data={LISTDATA}
-                                    showsHorizontalScrollIndicator={false}
-                                    ItemSeparatorComponent={
-                                      () => <View style={{ width: 16, }}/>
-                                  }
-                                    horizontal={true}
-                                    renderItem={({item, index})=>
-                                    (<TouchableOpacity activeOpacity={0.9} onPress={()=>{this.props.navigation.navigate('Detail')}}>
+                            renderItem = {({ item, section }) => {
+                              if(section.data.length<2)
+                                return (<TouchableOpacity activeOpacity={0.8} onPress={()=>{this.props.navigation.navigate('Detail',{item:item})}}>
                                        <ProductCard item={item}/>
-                                    </TouchableOpacity>)}
-                                    keyExtractor={item => item.id}
-                                />)}
-                        renderSectionHeader={({ section: { title } }) => (
+                                    </TouchableOpacity>)
+                                else
+                                    return null }}
+
+                            renderSectionHeader={({ section  }) => {
+                              return(
+                              <View>
                                 <View style={{flexDirection:'row', justifyContent:'space-between',marginBottom:15,marginTop:30}}>
-                                    <Text style={{  fontSize:22, textAlign:'center',fontFamily:'PublicSans-Bold'}}>{title}</Text>
-                                    <TouchableOpacity onPress={()=>{this.props.navigation.navigate("Category",{category:title})}}>
+                                    <Text style={{  fontSize:22, textAlign:'center',fontFamily:'PublicSans-Bold'}}>{section.title}</Text>
+                                    <TouchableOpacity onPress={()=>{this.props.navigation.navigate("Category",{category:section.title})}}>
                                     <View style={{ flexDirection:'row', justifyContent:'center',marginHorizontal:12,alignItems:'center',marginVertical:5}}>
                                         <Text style={{color:'#808080',  fontFamily:'PublicSans-SemiBold'}}>See All{' '}</Text>
                                         <AntDesign name="right" size={12}  color="#808080"/>
                                     </View>
                                     </TouchableOpacity>
-                                </View>
-                        )}
-                        />
+                                    </View>
+                                    {section.data.length>1 &&
+                                     <FlatList
+                                     data={section.data}
+                                     showsHorizontalScrollIndicator={false}
+                                     ItemSeparatorComponent = {
+                                       () => <View style={{ width: 16, }}/>
+                                   }
+                                     horizontal={true}
+                                     renderItem={({item, index})=>{
+                                     return (<TouchableOpacity activeOpacity={0.8} onPress={()=>{this.props.navigation.navigate('Detail', {item:item})}}>
+                                        <ProductCard item={item}/>
+                                     </TouchableOpacity>)}}
+                                     keyExtractor={item => item.listing_id}
+                                 />}
+                                </View>)}}/>
                </View>
                
         )
@@ -128,3 +183,4 @@ const styles = StyleSheet.create({
 }
 
 })
+
